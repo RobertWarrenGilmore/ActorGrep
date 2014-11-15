@@ -1,33 +1,32 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.*;
+
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.actor.Props;
 
 public class CGrep {
 
-	 private static void solve(Executor e, Collection<Callable<Found>> solvers) throws InterruptedException, ExecutionException {
-	     ExecutorCompletionService<Found> ecs = new ExecutorCompletionService<Found>(e);
-	     for (Callable<Found> s : solvers)
-	         ecs.submit(s);
-	     for (int i = 0; i < solvers.size(); i++) {
-	    	 Found result = ecs.take().get();
-	         if (result != null) {
-	             System.out.println(result.getFileName() +" completed.");
-	             System.out.println(result);
-	         }
-	     }
-	     
-	 }
-	
-    public static void main(String[] args) throws InterruptedException, ExecutionException{
+    public static void main(String[] args) { 
         String pattern = args[0];
         String[] fileNames = Arrays.copyOfRange(args, 1, args.length);
-        Collection<Callable<Found>> solvers = new ArrayList<Callable<Found>>();
-        for (String fileName: fileNames) {
-            solvers.add(new GrepCallable(fileName, pattern));
-        }
-        ExecutorService e = Executors.newFixedThreadPool(3);
-        solve(e, solvers);
-        e.shutdown();
+		
+		ActorSystem system = ActorSystem.create("CGrep");
+		
+		ActorRef collectionActor = system.actorOf(Props.create(CollectionActor.class));
+		collectionActor.tell(fileNames.length, collectionActor);
+
+		if (fileNames.length != 0){
+			for(String fn : fileNames) {
+				Configure conf = new Configure(fn, collectionActor, pattern);
+				ActorRef scanActor = system.actorOf(Props.create(ScanActor.class));
+				scanActor.tell(conf, null);
+			}
+		} else {
+			Configure conf = new Configure(null, collectionActor, pattern);
+			ActorRef scanActor = system.actorOf(Props.create(ScanActor.class));
+			scanActor.tell(conf, null);
+		}
     }
 }
