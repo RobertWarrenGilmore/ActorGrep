@@ -2,9 +2,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static akka.actor.Actors.*;
 import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
 
 public class CGrep {
 
@@ -12,21 +11,22 @@ public class CGrep {
         String pattern = args[0];
         String[] fileNames = Arrays.copyOfRange(args, 1, args.length);
 		
-		ActorSystem system = ActorSystem.create("CGrep");
-		
-		ActorRef collectionActor = system.actorOf(Props.create(CollectionActor.class));
+		ActorRef collectionActor = actorOf(CollectionActor.class);
+		collectionActor.start();
 		FileCount fc = new FileCount(fileNames.length);
 		collectionActor.tell(fc, collectionActor);
 
 		if (fileNames.length != 0){
 			for(String fn : fileNames) {
 				Configure conf = new Configure(fn, collectionActor, pattern);
-				ActorRef scanActor = system.actorOf(Props.create(ScanActor.class));
+				ActorRef scanActor = actorOf(ScanActor.class);
+				scanActor.start();
 				scanActor.tell(conf, null);
 			}
 		} else {
 			Configure conf = new Configure(null, collectionActor, pattern);
-			ActorRef scanActor = system.actorOf(Props.create(ScanActor.class));
+			ActorRef scanActor = actorOf(ScanActor.class);
+			scanActor.start();
 			scanActor.tell(conf, null);
 		}
     }

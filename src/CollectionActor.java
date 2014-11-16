@@ -36,7 +36,7 @@ public class CollectionActor extends UntypedActor {
 			this.returnedFiles += 1;
 
 			if(this.returnedFiles == this.fileCount) {
-				Actors.registry().shutdown();
+				Actors.registry().shutdownAll();
 			}
 			
 		} else {
