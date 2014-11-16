@@ -31,7 +31,7 @@ public class ScanActor extends UntypedActor {
 			config.getActorRef().tell(found, null);
 
 		} else {
-			throw new IllegalArgumentException("Unknown message: " + message);
+			throw new IllegalArgumentException("Scan actor Unknown message: " + message);
 		}
 	}
 

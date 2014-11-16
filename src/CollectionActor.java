@@ -1,6 +1,6 @@
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
-//import akka.actor.Actors;
+import akka.actor.Actors;
 
 import java.util.*;
 
@@ -10,7 +10,7 @@ public class CollectionActor extends UntypedActor {
 
 	private int returnedFiles = 0;
 	public void onReceive(Object message) throws Exception {
-
+		
 		if (message instanceof FileCount && !didReceiveFileCount) {
 			this.fileCount = ((FileCount)message).getFileCount();
 			this.didReceiveFileCount = true;
@@ -35,9 +35,9 @@ public class CollectionActor extends UntypedActor {
 
 			this.returnedFiles += 1;
 
-//			if(this.returnedFiles == this.fileCount) {
-//				Actors.registry().shutdown();
-//			}
+			if(this.returnedFiles == this.fileCount) {
+				Actors.registry().shutdown();
+			}
 			
 		} else {
 			throw new IllegalArgumentException("Unknown message: " + message);

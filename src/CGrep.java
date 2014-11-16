@@ -15,7 +15,8 @@ public class CGrep {
 		ActorSystem system = ActorSystem.create("CGrep");
 		
 		ActorRef collectionActor = system.actorOf(Props.create(CollectionActor.class));
-		collectionActor.tell(fileNames.length, collectionActor);
+		FileCount fc = new FileCount(fileNames.length);
+		collectionActor.tell(fc, collectionActor);
 
 		if (fileNames.length != 0){
 			for(String fn : fileNames) {
